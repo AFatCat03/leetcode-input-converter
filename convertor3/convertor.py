@@ -1,6 +1,5 @@
 from playwright.sync_api import sync_playwright
-from convertor_total import set_types, convert
-import convertor_java
+from convertor_total import convert
 
 # 获取每日一题页面URL
 def get_daily_problem_url(browser):
@@ -16,27 +15,19 @@ def get_daily_problem_url(browser):
 def problem_page(url, lang):
     page.goto(url)
 
-    # 等待页面加载
-    page.wait_for_selector('[data-e2e-locator="console-testcase-tag"]', state="visible")
-    cases = page.locator('[data-e2e-locator="console-testcase-tag"]')
-
     # 更换至指定语言
+    page.get_by_text("C++").wait_for(state="visible")
     page.get_by_text("C++").click()
     page.get_by_text(lang, exact=True).last.click()
-    set_types(page, lang)
 
-    # print(cases.count())
-    for case in cases.all():
-        # case.click()
-        case.evaluate("element => element.click()") # 切换测试用例
-        input_elems = page.get_by_placeholder('请输入测试用例')
-        output_elems = convert(input_elems, lang)
-        print(output_elems)
+    convert(page, lang)
 
 
 
 playwright = sync_playwright().start()
-browser = playwright.chromium.launch(headless=False, slow_mo=50)
+# browser = playwright.chromium.launch(headless=False, slow_mo=50)
+browser = playwright.chromium.launch(slow_mo=100)
 page = browser.new_page()
 problem_page(get_daily_problem_url(browser), 'Java')
+page.close()
 # problem_page(r'https://leetcode.cn/problems/rearranging-fruits/description/?envType=daily-question&envId=2025-08-02', 'Java')

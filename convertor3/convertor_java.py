@@ -1,6 +1,30 @@
 from playwright.sync_api import sync_playwright
+from pathlib import Path
+import re
+
 
 types = []
+
+def get_class_name(page):
+
+    # 获取题目序号
+    problem_name = page.locator('.text-title-large > a').first.inner_text()
+    problem_id = problem_name[:problem_name.index('.')]
+
+    basename_re = re.compile(r'problems/(.*)/')
+    basename_match = basename_re.search(page.url)
+    basename = basename_match.group(1)
+
+    pattern = re.compile(r'-(.)')
+    modified_basename = pattern.sub(lambda match: match.group(1).upper(), basename)
+
+    classname = modified_basename[0].upper() + modified_basename[1:] + problem_id
+
+    return classname
+
+def get_extension():
+    return '.java'
+
 
 def set_types(page):
     page.wait_for_selector('span.mtk10')
@@ -30,7 +54,7 @@ def array_convert(cur_type, elem):
 def other_convert(cur_type, elem):
     return elem
 
-def convert(input_elems):
+def input_convert(input_elems):
     res = ''
     for i in range(input_elems.count()):
         res += ', '
@@ -39,7 +63,44 @@ def convert(input_elems):
         if cur_type[-2:] == '[]':
             res += array_convert(cur_type, elem)
         else:
-            res += other_convert(elem)
+            res += other_convert(cur_type, elem)
 
     res = res[2:]
     return res
+
+
+def convert(page):
+    # 等待页面加载
+    page.wait_for_selector('[data-e2e-locator="console-testcase-tag"]', state="visible")
+    cases = page.locator('[data-e2e-locator="console-testcase-tag"]')
+
+    set_types(page)
+
+    class_name = get_class_name(page)
+    instance_name = class_name[0].lower() + class_name[1:]
+    func_name = page.locator('span.mtk10').inner_text()
+
+    (Path.home() / 'Desktop/leetcode').mkdir(exist_ok=True)
+    output_file = open(Path.home() / f"Desktop/leetcode/{class_name}{get_extension()}", 'w', encoding='UTF-8')
+
+    output_file.write(f'public class {class_name}\n')
+    output_file.write('{\n')
+    output_file.write(page.locator('span.mtk10').locator('..').inner_text()[:-1] + '\n')
+    output_file.write('    {\n')
+    output_file.write('        \n')
+    output_file.write('    }\n')
+    output_file.write('\n')
+    output_file.write('    public static void main(String[] args)\n')
+    output_file.write('    {\n')
+    output_file.write(f'        {class_name} {instance_name} = new {class_name}();\n')
+
+    for case in cases.all():
+        case.evaluate("element => element.click()") # 切换测试用例
+        input_elems = page.get_by_placeholder('请输入测试用例')
+        output_elems = input_convert(input_elems)
+        output_file.write(f'        System.out.println({instance_name}.{func_name}({output_elems}));\n')
+
+    output_file.write('    }\n')
+    output_file.write('}\n')
+
+    output_file.close()
