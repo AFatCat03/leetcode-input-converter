@@ -38,6 +38,20 @@ def set_types(page):
         types.append(mtk9.inner_text() + mtk9.locator('css=+ span.mtk1').inner_text()[:-1]) # 最后的切片去除mtk1元素中末尾的空格
 
 
+def treenode(values, index):
+    if index >= len(values) or values[index] == 'null':
+        return 'null'
+    else:
+        return f'new TreeNode({int(values[index])}, {treenode(values, 2 * index)}, {treenode(values, 2 * index + 1)})'
+
+def treenode_convert(elem):
+    values = elem[1:-1].split(',')
+    if len(values) == 1 and values[0] == '':
+        return 'null'
+    values.insert(0, '')
+    return treenode(values, 1)
+
+
 def char_array_convert(elem):
     return other_array_convert(elem).replace('"', '\'')
 
@@ -52,8 +66,10 @@ def array_convert(cur_type, elem):
         res += other_array_convert(elem)
     return res
 
+
 def other_convert(cur_type, elem):
     return elem
+
 
 def input_convert(input_elems):
     res = ''
@@ -61,7 +77,9 @@ def input_convert(input_elems):
         res += ', '
         elem = input_elems.nth(i).inner_text()
         cur_type = types[i]
-        if cur_type[-2:] == '[]':
+        if cur_type == 'TreeNode':
+            res += treenode_convert(elem)
+        elif cur_type[-2:] == '[]':
             res += array_convert(cur_type, elem)
         else:
             res += other_convert(cur_type, elem)

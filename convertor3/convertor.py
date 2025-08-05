@@ -25,9 +25,9 @@ def problem_page(url, lang):
 
 
 playwright = sync_playwright().start()
-# browser = playwright.chromium.launch(headless=False, slow_mo=50)
+# browser = playwright.chromium.launch(headless=False, slow_mo=100)
 browser = playwright.chromium.launch(slow_mo=100)
 page = browser.new_page()
 problem_page(get_daily_problem_url(browser), 'Java')
+# problem_page(r'https://leetcode.cn/problems/binary-tree-tilt/description/', 'Java')
 page.close()
-# problem_page(r'https://leetcode.cn/problems/rearranging-fruits/description/?envType=daily-question&envId=2025-08-02', 'Java')
