@@ -91,7 +91,7 @@ def convert(page):
     output_file.write(' */\n')
     output_file.write(f'public class {class_name}\n')
     output_file.write('{\n')
-    output_file.write(page.locator('span.mtk10').locator('..').inner_text()[:-1] + '\n')
+    output_file.write((page.locator('span.mtk10').locator('..').inner_text()[:-1]).replace(' ', ' ') + '\n')
     output_file.write('    {\n')
     output_file.write('        \n')
     output_file.write('    }\n')
