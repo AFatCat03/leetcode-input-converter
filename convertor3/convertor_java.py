@@ -1,4 +1,5 @@
 from playwright.sync_api import sync_playwright
+from datetime import date
 from pathlib import Path
 import re
 
@@ -76,6 +77,7 @@ def convert(page):
 
     set_types(page)
 
+    author = 'AFatCat03'
     class_name = get_class_name(page)
     instance_name = class_name[0].lower() + class_name[1:]
     func_name = page.locator('span.mtk10').inner_text()
@@ -83,6 +85,10 @@ def convert(page):
     (Path.home() / 'Desktop/leetcode').mkdir(exist_ok=True)
     output_file = open(Path.home() / f"Desktop/leetcode/{class_name}{get_extension()}", 'w', encoding='UTF-8')
 
+    output_file.write('/**\n')
+    output_file.write(f' * @author {author}\n')
+    output_file.write(f" * @date {str(date.today()).replace('-', '/')}\n")
+    output_file.write(' */\n')
     output_file.write(f'public class {class_name}\n')
     output_file.write('{\n')
     output_file.write(page.locator('span.mtk10').locator('..').inner_text()[:-1] + '\n')
