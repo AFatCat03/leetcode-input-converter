@@ -28,6 +28,8 @@ def get_extension():
 
 
 def set_types(page):
+    global types
+
     page.wait_for_selector('span.mtk10')
     page.wait_for_selector('span.mtk9')
     mtk10_locator = page.locator('span.mtk10')
@@ -36,6 +38,16 @@ def set_types(page):
     mtk9_locator = mtk10_locator.locator('css=~ span.mtk9')
     for mtk9 in mtk9_locator.all():
         types.append(mtk9.inner_text() + mtk9.locator('css=+ span.mtk1').inner_text()[:-1]) # 最后的切片去除mtk1元素中末尾的空格
+
+    newTypes = []
+    index = 0
+    while index < len(types):
+        newTypes.append(types[index])
+        while index < len(types) and types[index] == 'List':
+            index += 1
+        index += 1
+    types = newTypes
+    # print(types)
 
 
 def treenode(values, index):
@@ -50,6 +62,10 @@ def treenode_convert(elem):
         return 'null'
     values.insert(0, '')
     return treenode(values, 1)
+
+
+def list_convert(elem):
+    return elem.replace(',', ', ').replace('[', 'List.of(').replace(']', ')')
 
 
 def char_array_convert(elem):
@@ -79,6 +95,8 @@ def input_convert(input_elems):
         cur_type = types[i]
         if cur_type == 'TreeNode':
             res += treenode_convert(elem)
+        elif cur_type == 'List':
+            res += list_convert(elem)
         elif cur_type[-2:] == '[]':
             res += array_convert(cur_type, elem)
         else:
