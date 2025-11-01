@@ -64,6 +64,12 @@ def treenode_convert(elem):
     return treenode(values, 1)
 
 
+def listnode_convert(values):
+    if len(values) <= 0:
+        return 'null'
+    return f'new ListNode({int(values[0])}, {listnode_convert(values[1:])})'
+
+
 def list_convert(elem):
     return elem.replace(',', ', ').replace('[', 'List.of(').replace(']', ')')
 
@@ -95,6 +101,8 @@ def input_convert(input_elems):
         cur_type = types[i]
         if cur_type == 'TreeNode':
             res += treenode_convert(elem)
+        elif cur_type == 'ListNode':
+            res += listnode_convert(elem[1:-1].split(','))
         elif cur_type == 'List':
             res += list_convert(elem)
         elif cur_type[-2:] == '[]':
@@ -112,6 +120,7 @@ def convert(page):
     cases = page.locator('[data-e2e-locator="console-testcase-tag"]')
 
     set_types(page)
+    #print(types)
 
     author = 'AFatCat03'
     class_name = get_class_name(page)
