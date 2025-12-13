@@ -1,5 +1,6 @@
 from playwright.sync_api import sync_playwright
 from convertor_total import convert
+import time
 
 # 获取每日一题页面URL
 def get_daily_problem_url(browser):
@@ -29,5 +30,6 @@ playwright = sync_playwright().start()
 browser = playwright.chromium.launch(slow_mo=100)
 page = browser.new_page()
 problem_page(get_daily_problem_url(browser), 'Java')
-# problem_page(r'https://leetcode.cn/problems/binary-tree-tilt/description/', 'Java')
+# problem_page(r'https://leetcode.cn/problems/two-sum/description/', 'Java')
+# time.sleep(1000)
 page.close()

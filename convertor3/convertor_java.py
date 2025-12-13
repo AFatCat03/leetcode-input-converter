@@ -35,9 +35,11 @@ def set_types(page):
     mtk10_locator = page.locator('span.mtk10')
     assert mtk10_locator.count() == 1, f'Only support problems which has only one function {mtk10_locator.count()}'
 
-    mtk9_locator = mtk10_locator.locator('css=~ span.mtk9')
+    #mtk9_locator = mtk10_locator.locator('css=~ span.mtk9')
+    mtk9_locator = page.locator('xpath=//span[contains(@class, "mtk10")]/following::span[contains(@class, "mtk9")]')
     for mtk9 in mtk9_locator.all():
         types.append(mtk9.inner_text() + mtk9.locator('css=+ span.mtk1').inner_text()[:-1]) # 最后的切片去除mtk1元素中末尾的空格
+    #print(types)
 
     newTypes = []
     index = 0
@@ -94,11 +96,13 @@ def other_convert(cur_type, elem):
 
 
 def input_convert(input_elems):
+    # print(types)
     res = ''
     for i in range(input_elems.count()):
         res += ', '
         elem = input_elems.nth(i).inner_text()
         cur_type = types[i]
+        # print(cur_type)
         if cur_type == 'TreeNode':
             res += treenode_convert(elem)
         elif cur_type == 'ListNode':
@@ -136,7 +140,14 @@ def convert(page):
     output_file.write(' */\n')
     output_file.write(f'public class {class_name}\n')
     output_file.write('{\n')
-    output_file.write((page.locator('span.mtk10').locator('..').inner_text()[:-1]).replace(' ', ' ') + '\n')
+
+    func_line = page.locator('span.mtk10').locator('..').inner_text()
+    output_file.write((func_line[:-1]).replace(' ', ' '))
+    if func_line[-1] != '{':
+        next_line_locator = page.locator('xpath=//span[contains(@class, "mtk10")]/ancestor::div[1]/following-sibling::div[1]')
+        output_file.write(' ' + (next_line_locator.inner_text()[:-1]).replace(' ', ' '))
+    output_file.write('\n')
+
     output_file.write('    {\n')
     output_file.write('        \n')
     output_file.write('    }\n')
